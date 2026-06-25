@@ -28,6 +28,8 @@ namespace Flight_Management_System.MODELS
 
         public int availableSeats { get; set; }        // System Calculated from Aircraft.totalSeats
 
+        public int flightDuration { get; set; }        // Duration in Hours
+
         public string status { get; set; }             // Default Value = "Scheduled"
                                                        // Scheduled | Departed | Cancelled
     }

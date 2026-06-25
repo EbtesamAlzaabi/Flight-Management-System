@@ -217,6 +217,11 @@ namespace Flight_Management_System
             Console.Write("Enter Aircraft ID: ");
             int aircraftId = int.Parse(Console.ReadLine());
 
+            // Read Flight Duration
+            Console.Write("Enter Flight Duration (Hours): ");
+            int flightDuration = int.Parse(Console.ReadLine());
+
+
             // LINQ: Find the selected aircraft
             // يبحث داخل قائمة الطائرات عن الطائرة التي رقمها يساوي الرقم الذي أدخله المستخدم .//
             Aircraft aircraft =
@@ -300,6 +305,7 @@ namespace Flight_Management_System
                     departureDate = departureDate,
                     departureTime = departureTime,
                     ticketPrice = ticketPrice,
+                    flightDuration = flightDuration,
 
                     // Available seats come from the selected aircraft
                     availableSeats = aircraft.totalSeats,
@@ -499,7 +505,284 @@ namespace Flight_Management_System
         }
 
 
+        // ─────────────────────────────────────────────────────────────
+        // MEDIUM 08 — Depart a Flight
+        // touches: Flights, Pilots
+        // ─────────────────────────────────────────────────────────────
+        public static void DepartFlight()
+        {
+            Console.WriteLine("\n=== Depart Flight ===");
 
+            // Read Flight ID
+            Console.Write("Enter Flight ID: ");
+            int flightId = int.Parse(Console.ReadLine());
+
+
+            // Find Flight
+            Flight flight = context.Flights
+                .FirstOrDefault(f => f.flightId == flightId);
+
+            if (flight == null)
+            {
+                Console.WriteLine("Flight not found.");
+                return;
+            }
+
+            // Check Status
+            if (flight.status == "Departed")
+            {
+                Console.WriteLine("Flight already departed.");
+                return;
+            }
+
+            if (flight.status == "Cancelled")
+            {
+                Console.WriteLine("Cancelled flight cannot depart.");
+                return;
+            }
+
+            // Find Assigned Pilot
+            Pilot pilot = context.Pilots
+                .FirstOrDefault(p => p.pilotId == flight.pilotId);
+
+            if (pilot == null)
+            {
+                Console.WriteLine("Pilot not found.");
+                return;
+            }
+
+            // Update Pilot Flight Hours
+            pilot.flightHours += flight.flightDuration;
+
+            // Mark Flight as Departed
+            flight.status = "Departed";
+
+            // Confirm Departure
+            Console.WriteLine("\nFlight departed successfully.");
+            Console.WriteLine($"Flight Status: {flight.status}");
+            Console.WriteLine($"Pilot Total Flight Hours: {pilot.flightHours}");
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // MEDIUM 09 — Cancel a Flight
+        // touches: Flights, Bookings, Pilots
+        // ─────────────────────────────────────────────────────────────
+        public static void CancelFlight()
+        {
+            Console.WriteLine("\n=== Cancel Flight ===");
+
+            // Read Flight ID
+            Console.Write("Enter Flight ID: ");
+            int flightId = int.Parse(Console.ReadLine());
+
+            // Find Flight
+            Flight flight =
+                context.Flights
+                .FirstOrDefault(f => f.flightId == flightId);
+
+            if (flight == null)
+            {
+                Console.WriteLine("Flight not found.");
+                return;
+            }
+
+            if (flight.status == "Cancelled")
+            {
+                Console.WriteLine("Flight already cancelled.");
+                return;
+            }
+
+            if (flight.status == "Departed")
+            {
+                Console.WriteLine("Departed flight cannot be cancelled.");
+                return;
+            }
+
+            // Cancel Flight
+            flight.status = "Cancelled";
+
+            // Find All Confirmed Bookings
+            var bookings =
+                context.Bookings
+                .Where(b =>
+                    b.flightId == flight.flightId &&
+                    b.status == "Confirmed")
+                .ToList();
+
+            // Count Affected Bookings
+            int affectedBookings = bookings.Count;
+
+            // Cancel All Bookings
+            foreach (var booking in bookings)
+            {
+                booking.status = "Cancelled";
+            }
+
+            // Make Pilot Available Again
+            Pilot pilot =
+                context.Pilots
+                .FirstOrDefault(p => p.pilotId == flight.pilotId);
+
+            if (pilot != null)
+            {
+                pilot.isAvailable = true;
+            }
+
+            // Confirmation
+            Console.WriteLine("\nFlight cancelled successfully.");
+            Console.WriteLine($"Affected Bookings: {affectedBookings}");
+        }
+
+
+        // ─────────────────────────────────────────────────────────────
+        // HARD 10 — Passenger Booking History
+        // touches: Passengers, Bookings, Flights
+        // ─────────────────────────────────────────────────────────────
+        public static void PassengerBookingHistory()
+        {
+            Console.WriteLine("\n=== Passenger Booking History ===");
+
+            Console.Write("Enter Passenger ID: ");
+            int passengerId = int.Parse(Console.ReadLine());
+
+            // Find Passenger
+            var passenger =
+                context.Passengers
+                .FirstOrDefault(p => p.passengerId == passengerId);
+
+            if (passenger == null)
+            {
+                Console.WriteLine("Passenger not found.");
+                return;
+            }
+
+            // Get Passenger Bookings *
+            // هات جميع حجوزات هذا الراكب، ثم اربط كل حجز بالرحلة الخاصة به،
+            // ثم اعرض المعلومات المطلوبة من الجدولين معًا(Booking + Flight ).
+            var bookings = context.Bookings
+                .Where(b => b.passengerId == passengerId)
+                .ToList();
+
+            if (!bookings.Any())
+            {
+                Console.WriteLine("No bookings found.");
+                return;
+            }
+
+
+            Console.WriteLine("\n=== Booking History ===");
+
+            foreach (var booking in bookings)
+            {
+                Flight flight = context.Flights
+                    .FirstOrDefault(f => f.flightId == booking.flightId);
+
+
+                Console.WriteLine("\n--------------------------------");
+
+                Console.WriteLine($"Flight Code: {flight.flightCode}");
+                Console.WriteLine($"Origin: {flight.origin}");
+                Console.WriteLine($"Destination: {flight.destination}");
+                Console.WriteLine($"Departure Date: {flight.departureDate}");
+
+                Console.WriteLine($"Seat Number: {booking.seatNumber}");
+                Console.WriteLine($"Price Paid: {booking.totalPrice}");
+                Console.WriteLine($"Booking Status: {booking.status}");
+            }
+
+
+            // LINQ: Calculate total spent on confirmed bookings only
+            // هات جميع الحجوزات الخاصة بهذا الراكب، وخذ منها الحجوزات المؤكدة فقط،
+            // ثم اجمع أسعارها واحفظ الناتج في totalSpent
+
+            decimal totalSpent =
+                context.Bookings
+                .Where(b =>
+                    b.passengerId == passengerId &&
+                    b.status == "Confirmed")
+                .Sum(b => b.totalPrice);
+
+            Console.WriteLine("\n================================");
+
+            Console.WriteLine($"Total Amount Spent: {totalSpent}");
+        }
+
+
+        // ─────────────────────────────────────────────────────────────
+        // HARD 11 — Flight Revenue & Load Factor Report
+        // touches: Flights, Bookings, Aircrafts
+        // ─────────────────────────────────────────────────────────────
+        public static void FlightRevenueLoadFactorReport()
+        {
+            Console.WriteLine("\n=== Flight Revenue & Load Factor Report ===");
+
+            var report =
+                from flight in context.Flights
+
+                join aircraft in context.Aircrafts
+                on flight.aircraftId equals aircraft.aircraftId
+
+                let confirmedBookings =
+                    context.Bookings
+                    .Where(b =>
+                        b.flightId == flight.flightId &&
+                        b.status == "Confirmed")
+
+                let totalBookings = confirmedBookings.Count()
+
+                let totalRevenue = confirmedBookings.Sum(b => b.totalPrice)
+
+                let loadFactor =
+                    aircraft.totalSeats > 0
+                    ? ((double)totalBookings / aircraft.totalSeats) * 100
+                    : 0
+
+                orderby totalRevenue descending
+
+                select new
+                {
+                    flight.flightCode,
+
+                    Route = flight.origin + " -> " + flight.destination,
+
+                    TotalBookings = totalBookings,
+
+                    TotalRevenue = totalRevenue,
+
+                    LoadFactor = loadFactor
+                };
+
+            if (!report.Any())
+            {
+                Console.WriteLine("No flights found.");
+                return;
+            }
+
+            foreach (var item in report)
+            {
+                Console.WriteLine("\n--------------------------------");
+
+                Console.WriteLine($"Flight Code: {item.flightCode}");
+
+                Console.WriteLine($"Route: {item.Route}");
+
+                Console.WriteLine($"Confirmed Bookings: {item.TotalBookings}");
+
+                Console.WriteLine($"Revenue: {item.TotalRevenue}");
+
+                Console.WriteLine($"Load Factor: {item.LoadFactor:F2}%");
+            }
+
+            // LINQ: Grand Total Revenue Across All Flights
+            decimal grandTotalRevenue =
+                context.Bookings
+                .Where(b => b.status == "Confirmed")
+                .Sum(b => b.totalPrice);
+
+            Console.WriteLine("\n================================");
+
+            Console.WriteLine($"Grand Total Revenue: {grandTotalRevenue}");
+        }
 
 
 
@@ -539,10 +822,10 @@ namespace Flight_Management_System
                         case 5: ScheduleFlight(); break;
                         case 6: BookFlight(); break;
                         case 7: CancelBooking(); break;
-                        //case 8: DepartFlight(); break;
-                        //case 9: CancelFlight(); break;
-                        //case 10: PassengerBookingHistory(); break;
-                        //case 11: FlightRevenueLoadFactorReport(); break;
+                        case 8: DepartFlight(); break;
+                        case 9: CancelFlight(); break;
+                        case 10: PassengerBookingHistory(); break;
+                        case 11: PassengerBookingHistory(); break;
                         case 0: exit = true; break;
                         default: Console.WriteLine("Invalid option. Please try again."); break;
                     }
@@ -560,4 +843,4 @@ namespace Flight_Management_System
 
         }
     }
-}
+

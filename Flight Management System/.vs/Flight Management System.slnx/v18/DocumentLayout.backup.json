@@ -1,0 +1,41 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\ebtes\\OneDrive\\Desktop\\backent taske in app\\MS Karim\\Flight Management System - FMS-Ebtesam alzaabi\\Flight Management System\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{002B7ECD-5310-9AA2-C394-EF23DFC2D8D6}|Flight Management System\\Flight Management System.csproj|c:\\users\\ebtes\\onedrive\\desktop\\backent taske in app\\ms karim\\flight management system - fms-ebtesam alzaabi\\flight management system\\flight management system\\models\\flight.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{002B7ECD-5310-9AA2-C394-EF23DFC2D8D6}|Flight Management System\\Flight Management System.csproj|solutionrelative:flight management system\\models\\flight.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Flight.cs",
+              "DocumentMoniker": "C:\\Users\\ebtes\\OneDrive\\Desktop\\backent taske in app\\MS Karim\\Flight Management System - FMS-Ebtesam alzaabi\\Flight Management System\\Flight Management System\\MODELS\\Flight.cs",
+              "RelativeDocumentMoniker": "Flight Management System\\MODELS\\Flight.cs",
+              "ToolTip": "C:\\Users\\ebtes\\OneDrive\\Desktop\\backent taske in app\\MS Karim\\Flight Management System - FMS-Ebtesam alzaabi\\Flight Management System\\Flight Management System\\MODELS\\Flight.cs",
+              "RelativeToolTip": "Flight Management System\\MODELS\\Flight.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAB4AAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-25T10:34:47.258Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
